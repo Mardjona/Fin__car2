@@ -1,0 +1,14 @@
+/Users/admin/RiderProjects/Fin_car2/Fin_car2/obj/Debug/net8.0/Fin_car2.GeneratedMSBuildEditorConfig.editorconfig
+/Users/admin/RiderProjects/Fin_car2/Fin_car2/obj/Debug/net8.0/Fin_car2.AssemblyInfoInputs.cache
+/Users/admin/RiderProjects/Fin_car2/Fin_car2/obj/Debug/net8.0/Fin_car2.AssemblyInfo.cs
+/Users/admin/RiderProjects/Fin_car2/Fin_car2/obj/Debug/net8.0/Fin_car2.csproj.CoreCompileInputs.cache
+/Users/admin/RiderProjects/Fin_car2/Fin_car2/bin/Debug/net8.0/Fin_car2
+/Users/admin/RiderProjects/Fin_car2/Fin_car2/bin/Debug/net8.0/Fin_car2.deps.json
+/Users/admin/RiderProjects/Fin_car2/Fin_car2/bin/Debug/net8.0/Fin_car2.runtimeconfig.json
+/Users/admin/RiderProjects/Fin_car2/Fin_car2/bin/Debug/net8.0/Fin_car2.dll
+/Users/admin/RiderProjects/Fin_car2/Fin_car2/bin/Debug/net8.0/Fin_car2.pdb
+/Users/admin/RiderProjects/Fin_car2/Fin_car2/obj/Debug/net8.0/Fin_car2.dll
+/Users/admin/RiderProjects/Fin_car2/Fin_car2/obj/Debug/net8.0/refint/Fin_car2.dll
+/Users/admin/RiderProjects/Fin_car2/Fin_car2/obj/Debug/net8.0/Fin_car2.pdb
+/Users/admin/RiderProjects/Fin_car2/Fin_car2/obj/Debug/net8.0/Fin_car2.genruntimeconfig.cache
+/Users/admin/RiderProjects/Fin_car2/Fin_car2/obj/Debug/net8.0/ref/Fin_car2.dll
