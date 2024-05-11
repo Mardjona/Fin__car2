@@ -1,229 +1,312 @@
 namespace Fin_car2;
 
-internal class Trucks : Avto
-{
-    // public List<Trucks> _acc1 = new List<Trucks>();
-    public Trucks() 
+
+internal class Gruz : Avto
     {
-        EnterInfo();
-    }
-    protected void EnterInfo()
-    {
+        protected double _maxCapacity; //грузоподъемность
+        protected double _weightCargo; //Вес груза
+        protected double _distanceToUnload; //расстояние от места погрузки до места рагрузки (_distance - от начальных координат до места погрузки)
+        protected double _distanceBack; //расстояние от места разгрузки к начальным координатам
+        protected double _deliveryX; //координаты места разгрузки
+        protected double _deliveryY;
+        protected List<List<string>> _coordinatesAll = new(); //Координаты всего пути
+
+
+
+        protected override void getDistance(List<Avto> avtos) //Грузовик останавливается в трех местах. всего 4 точки, после второй остановки возвращается к начальным координатам
         {
-            Console.Write("Введите номер грузовика : ");
-            _number = Console.ReadLine();
-            _fuelMax = 80; // максимальное колво топлива в баке
-            Console.Write("Текущее количество топлива в бензобаке( Не более 80 л): ");
-            _fuelCount = Convert.ToDouble(Console.ReadLine());
-            if (_fuelCount > _fuelMax)
+            while (true)
             {
-                Console.WriteLine("Ошибка. Текущее значение не может превышать максимальное");
-                return;
-            }
-            Console.WriteLine("Грузовик добавлен");
-        }
-    }
-
-    //вывод информации
-    protected override void Out()
-    {
-        Console.WriteLine
-        ("--------------------------------\n" +
-         "Номер: {0}\n" +
-         "Толпиво: {1:f}\n" +
-         "Местоположение: {2},{3}\n" +
-         "Максимум топлива: {4}\n" +
-         "Суммарный пробег: {5:f}\n" +
-         "Вес груза: {6:f}\n" +
-         "--------------------------------",
-            _number, _fuelCount, _corA[0], _corA[1], _fuelMax, _sumDistance, _weight);
-    }
-
-    //движение до точки
-    private void MoveToPlace()
-    {
-        
-        if (_weight >= 100 && _weight < 1000)
-        {
-            _kf = 0.4;
-        }
-        else if (_weight >= 1000 && _weight <= 2000)
-        {
-            _kf = 0.8;
-        }
-
-        double dis = DistanceToPlace();
-        double prob = dis;
-        
-        SpeedDeterm();
-        while (true)
-        {
-            double rem = Remains(dis);
-            if (rem <= _fuelCount)
-            { 
-                _fuelCount -= rem; // кол-во оставшегося топлива, после проезда до указанного расстояния 
-                _corA = _corB;
-                _sumDistance += prob; // суммарный пробег
-                Console.WriteLine(
-                    $"Вы проехали: {prob} км, топлива осталось: {_fuelCount} л, местоположение: {_corA[0]}, {_corB[1]}, " +
-                    $"раcход: {_fuelRate}, пробег: {_sumDistance}");
-                return;
-            }
-            else
-            {
-                var currendD = _fuelCount / (_fuelRate / 100); // сколько км проехал на остаток топлива
-                Console.Write($" Вы проехали: { prob + currendD } км" +
-                              $" Вам не хватает топлива, хотите заправиться: +/-\n" + ">");
-                var ans = Console.ReadLine();
-                if (ans == "+")
+                try
                 {
-                   dis -= _fuelCount / (_fuelRate / 100); // сколько км осталось проехать
-                    _fuelCount = 0;
-                    Refill();
-                   currendD =  _fuelCount / (_fuelRate / 100);
-                    prob = prob + currendD;
-                  
+                    Console.WriteLine("\nНеобходимо ввести координаты базы.\nВведите \"x\":\n");
+                    _startX = Convert.ToDouble(Console.ReadLine());
+                    Console.WriteLine("\nВведите \"y\":\n");
+                    _startY = Convert.ToDouble(Console.ReadLine());
+                    Console.WriteLine("\nНеобходимо ввести координаты точки погрузки.\nВведите \"x\":\n");
+                    _endX = Convert.ToDouble(Console.ReadLine());
+                    Console.WriteLine("\nВведите \"y\":\n");
+                    _endY = Convert.ToDouble(Console.ReadLine());
+                    Console.WriteLine("\nНеобходимо ввести координаты точки разгрузки.\nВведите \"x\":\n");
+                    _deliveryX = Convert.ToDouble(Console.ReadLine());
+                    Console.WriteLine("\nВведите \"y\":\n");
+                    _deliveryY = Convert.ToDouble(Console.ReadLine());
 
+                    _distance = Math.Sqrt(Math.Pow(_endX - _startX, 2) + Math.Pow(_endY - _startY, 2)); //вычисление расстояния к точке погрузки
+                    _distanceToUnload = Math.Sqrt(Math.Pow(_deliveryX - _endX, 2) + Math.Pow(_deliveryY - _endY, 2)); //вычисление расстояния к точке разгрузки
+                    _distanceBack = Math.Sqrt(Math.Pow(_startX - _deliveryX, 2) + Math.Pow(_startY - _deliveryY, 2)); //вычисление расстояния к точке погрузки
+
+                    Console.WriteLine();
+                    coorPlanning(_startX, _startY, _endX, _endY);
+                    coorPlanning(_endX, _endY, _deliveryX, _deliveryY);
+                    coorPlanning(_deliveryX, _deliveryY, _startX, _startY);
+                    fullDistance();
+
+
+                    string answer = "";
+                    while (answer == "")
+                    {
+                        Console.WriteLine("\nВы уверены, что ввели все правильно и хотите продолжить? (да/нет)\n");
+                        answer = Console.ReadLine();
+                        switch (answer)
+                        {
+                            case "да":
+                            case "нет":
+                                break;
+                            default:
+                                answer = "";
+                                break;
+                        }
+                    }
+                    if (answer == "да")
+                    {
+                        break;
+                    }
+                }
+                catch
+                {
+                    Console.WriteLine("\nКоординаты введены некорректно. Попробуйте снова с самого начала.");
+                }
+            }
+        }
+
+        protected void coorPlanning(double x1, double y1, double x2, double y2)
+        {
+            double startSample = x1;
+            List<string> coordinates = new();
+
+
+            if (x1 != x2) //Если начальный Х не равен конечному Х, то за основу построения маршрута берется Х. У находится по формуле прямой через две точки на пл-ти
+            {
+                if (x1 < x2)//Условия для направления движения
+                {
+                    while (startSample <= x2)
+                    {
+                        coordinates.Add(Convert.ToString(startSample));
+                        startSample++;
+                    }
                 }
                 else
                 {
-                    Console.WriteLine("Вы заглохли");
+                    while (startSample >= x2)
+                    {
+                        coordinates.Add(Convert.ToString(startSample));
+                        startSample--;
+                    }
+                }
+                for (int i = 0; i < coordinates.Count; i++)
+                {
+                    coordinates[i] += $"; {Convert.ToString(y1 + ((y2 - y1) * (Convert.ToDouble(coordinates[i]) - x1) / (x2 - x1)))}"; //ко всем элементам списка добавляется сооттветствующая координата Y. которая высчитывается по формуле прямой через две точки на плоскости
                 }
             }
-        }
-    }
-
-    //рассчет расхода относительно скорости
-    protected override void SpeedDeterm()
-    {
-        while (true)
-        {
-            Console.Write("\nВведите с какой скоростью поедете: ");
-            double speed = Convert.ToInt32(Console.ReadLine());
-            speed -= speed * _kf;
-            if (speed > 0)
+            else
             {
-                if (speed <= 45)
+                if (y1 < y2)
                 {
-                    _fuelRate = 12;
-                    return;
+                    while (y1 <= y2)
+                    {
+                        coordinates.Add($"{Convert.ToString(x1)};{Convert.ToString(y1)}");
+                        y1++;
+                    }
                 }
-                else if (speed > 46 && speed <= 100)
+                else
                 {
-                    _fuelRate = 9;
-                    return;
+                    while (y1 >= y2)
+                    {
+                        coordinates.Add($"{Convert.ToString(x1)};{Convert.ToString(y1)}");
+                        y1--;
+                    }
                 }
-                else if (speed > 101 && speed <= 180)
-                {
-                    _fuelRate = 12.5;
-                    return;
-                }
-                else Console.WriteLine("Невозможно ехать с такой скоротью");
             }
-            else Console.WriteLine("Невозможно ехать с такой скоротью");
-        }
-    }
 
-    //цикл движения
-    protected override void Move()
-    {
-        while (true)
-        {
-            Console.Write("Введите координаты места погрузки ( через пробел ) : ");
-            MoveToPlace();
-            Loading();
-            Console.Write("Введите координаты места разгрузки ( через пробел) : ");
-            MoveToPlace();
-            Unloading();
-            Console.Write("Хотите продолжить: +/-\n" + ">");
-            if (Console.ReadLine() == "-")
-                return;
+            _coordinatesAll.Add(coordinates);
         }
-    }
 
-    //погрузка
-    private void Loading()
-    {
-        while (true)
+        protected void fullDistance()
         {
-            Console.Write("Введите вес груза для погрузки: ");
-            int weight = Convert.ToInt32(Console.ReadLine());
-            if (weight > 0)
-                if (weight + _weight < _weightMax)
-                {
-                    _weight += weight;
-                    return;
-                }
-                else Console.WriteLine("Нельзя погрузить больше");
-            else Console.WriteLine("Груз не может иметь отрицательный вес");
-        }
-    }
-
-    //разгрузка
-    private void Unloading()
-    {
-        while (true)
-        {
-            Console.Write("Введите вес груза для разгрузки: ");
-            int weight = Convert.ToInt32(Console.ReadLine());
-            if (weight > 0)
-                if (weight <= _weight)
-                {
-                    _weight -= weight;
-                    return;
-                }
-                else Console.WriteLine("Нельзя разгрузить больше, чем есть");
-            else Console.WriteLine("Груз не может иметь отрицательный вес");
-        }
-    }
-
-    //рассчет расстояния до точки
-    private double DistanceToPlace()
-    {
-        while (true)
-        {
-            try
+            int i = 0;
+            foreach (List<string> coorDistance in _coordinatesAll)
             {
-                _corB = new int[2]; string[] s = Console.ReadLine().Split(',', ' ', ';');
-                for (int i = 0; i < _corB.Length; i++)
-                    _corB[i] = Int32.Parse(s[i]);
-                double c = Math.Sqrt(Math.Pow(_corB[0] - _corA[0], 2) + Math.Pow(_corB[1] - _corA[1], 2));
-                return Math.Round(c, 2);
-                
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
+                foreach (string coor in coorDistance)
+                {
+                    if (_coordinates.Count == 0)
+                    {
+                        _coordinates.Add(coor);
+                    }
+                    else
+                    {
+                        if (coor != _coordinates[i])
+                        {
+                            if (coorSearch(coor, _coordinates) == null)
+                            {
+                                _coordinates.Add(coor);
+                                i++;
+                            }
+                        }
+                    }
+                }
             }
         }
-    }
 
-    //интрефейс
-    public override void Menu(List<Avto> allAvtos)
-    {
-        while (true)
+        protected string coorSearch(string coor, List<string> coorArray)
         {
-            Console.Write
-            ("---------ГРУЗОВИК------------\n" +
-             "Выберете необходимое действие:\n" +
-             "1. Показать данные авто\n" +
-             "2. Заправиться\n" +
-             "3. Передвижение\n" +
-             "4. Выход\n" +
-             ">");
-            switch (Convert.ToInt32(Console.ReadLine()))
+            foreach (string coorA in coorArray)
             {
-                case 1:
-                    Out();
-                    break;
-                case 2:
-                    Refill();
-                    break;
-                case 3:
-                    Move();
-                    break;
-                case 4: return;
+                if (coor == coorA)
+                {
+                    return coor;
+                }
+            }
+            return null;
+        }
+
+        protected void load()
+        {
+            while (true)
+            {
+                try
+                {
+                    Console.WriteLine("Введите груз (в т), который повезет машина (до 2 т):\n");
+                    double cargo = Convert.ToDouble(Console.ReadLine());
+                    if (cargo > 0 && cargo <= 2)
+                    {
+                        _weightCargo = cargo;
+                        break;
+                    }
+                    else
+                    {
+                        Console.WriteLine("\nВведено значение вне заданного диапазона. Попробуйте снова.\n");
+                    }
+                }
+                catch
+                {
+                    Console.WriteLine("\nВведено некорректное значение. Попробуйте снова.\n");
+                }
+            }
+        }
+
+        protected override void speedUp()
+        {
+            while (true)
+            {
+                try
+                {
+                    Console.WriteLine("\nВведите значение скорости (от 1 до 180 км/ч), до которого хотите разогнаться:\n");
+                    _speed = Convert.ToDouble(Console.ReadLine());
+
+                    _speed = _weightCargo > 0.1 && _weightCargo <= 1 ? _speed * 0.6 : (_weightCargo > 1 && _weightCargo <= 2 ? _speed * 0.2 : _speed);
+                    string persent = _weightCargo > 0.1 && _weightCargo <= 1 ? "40" : (_weightCargo > 1 && _weightCargo <= 2 ? "80" : "");
+
+                    if (_speed > 0 && _speed <= 180)
+                    {
+                        if (_weightCargo > 0.1 && _weightCargo <= 2)
+                        {
+                            Console.WriteLine($"\nПредупреждение! С текущим весом груза в {_weightCargo} т скорость уменьшена на {persent}% - {_speed} км/ч.");
+                        }
+                        fuelConsumption(_speed);
+                        break; //Выход из цикла
+                    }
+                    else
+                    {
+                        Console.WriteLine("\nВведено значение вне заданного диапазона. Попробуйте снова.");
+                    }
+                }
+                catch
+                {
+                    Console.WriteLine("\nВведено некорректное значение. Попробуйте снова.");
+                }
+            }
+        }
+
+        protected void subDrive(double distance)
+        {
+            if (Math.Floor(_speed) == 0) //Если показатель скорости у машины равен 0, то будет инициирован разгон
+            {
+                speedUp();
+            }
+            double fuelDistance = _currentFuel / (_fuelConsumption / 100); //Расстояние, которое может проехать машина с заправленным баком
+            Console.WriteLine($"\nНеобходимо проехать {distance} км.\n\nНачало поездки.");
+            double needFuel = distance * (_fuelConsumption / 100); //Требуемое кол-во топлива для преодоления заданного расстояния
+            distance -= fuelDistance;
+            _currentFuel = fuelDistance > distance ? _currentFuel - needFuel : _currentFuel; //Если расстояние, которое может проехать машина с заправленным баком больше, чем то, которое нужно проехать, то от текущего кол-ва топ-ва отнимается требуемое для преодоления заданного расст-я
+
+            while (distance > 0) //Цикл езды
+            {
+                _speed = 0;
+                _currentFuel = 0; //обнуление кол-ва топлива
+                _milleage += fuelDistance; //Увеличение пробега
+
+                Console.WriteLine($"\nМашина проехала {Math.Round(fuelDistance, 2)} км.\nПробег: {Math.Round(_milleage, 2)}.\nОстаток топлива: {Math.Round(_currentFuel, 2)} литров.\nРасход топлива: {_fuelConsumption} л на 100 км.\nВес груза: {_weightCargo} т.\nОсталось ехать {Math.Round(distance, 2)} км.\nТребуется дозаправка.");
+                FillFuel(); //Обращение к методу заправки
+                speedUp();
+                fuelDistance = _currentFuel / (_fuelConsumption / 100); //Обновление расстояния, котрое может проехать машина с заправленным на текущее кол-во топлива баком
+                distance -= fuelDistance; //Обновление расстояния, которое необходимо проехать
+                needFuel = _currentFuel + (distance * (_fuelConsumption / 100));
+                _currentFuel = fuelDistance > distance ? _currentFuel - needFuel : _currentFuel;
+            }
+
+            _speed = 0;
+            _milleage += (fuelDistance += distance);//По завершении цикла расстояние становится отрицательным значением. Здесь остаток расстояния складывается с расстоянием,которая может проехать машина, после чего обновляется пробег
+            Console.WriteLine($"\nМашина проехала {Math.Round(fuelDistance, 2)} км.\nПробег: {Math.Round(_milleage, 2)}.\nОстаток топлива: {Math.Round(_currentFuel, 2)} литров.\nРасход топлива: {_fuelConsumption} л на 100 км.\nВес груза: {_weightCargo} т.");
+            _fuelConsumption = 0;
+        }
+
+        protected override void Drive(List<Avto> avtos) //Поездка для грузовика
+        {
+            while (_distance < 0)
+            {
+                Console.WriteLine("\nНеобходимо запланировать маршрут");
+                getDistance(avtos);
+            }
+            while (Math.Floor(_currentFuel) == 0) //заправка
+            {
+                Console.WriteLine("\nНевозможно начать поездку с пустым бензобаком.\nТребуется дозаправка");
+                FillFuel();
+            }
+
+            subDrive(_distance);
+
+            Console.WriteLine("\nМашина прибыла в точку погрузки.");
+            load();
+            subDrive(_distanceToUnload);
+
+            Console.WriteLine("\nМашина прибыла в точку разгрузки.\nВозврат на базу.");
+            _weightCargo = 0;
+            subDrive(_distanceBack);
+
+            Console.WriteLine("\nМашина прибыла на базу.\n\nПоездка завершена.");
+            _coordinates.Clear();
+        }
+
+        public override void commandCenter(List<Avto> avtos)
+        {
+            Console.WriteLine($"\nМеню машины {_number}.\n");
+            string continuation = "";
+            while (continuation == "")
+            {
+                Console.WriteLine(" Чтобы узнать информацию о машине, выберите \"1\".\n Чтобы запланировать маршрут, выберите \"2\".\n Чтобы заправить машину, выберите \"3\".\n Чтобы начать поездку, выберите \"4\".");
+                string option = Console.ReadLine();
+                switch (option)
+                {
+                    case "1":
+                        Console.WriteLine("\n");
+                        DisplayInfo();
+                        break;
+                    case "2":
+                        getDistance(avtos);
+                        break;
+                    case "3":
+                        FillFuel();
+                        break;
+                    case "4":
+                        Drive(avtos);
+                        break;
+                    default:
+                        Console.WriteLine("\nКоманды с таким номером не существует.");
+                        break;
+                }
+                Console.WriteLine("\nЧтобы продолжить нажмите \"Enter\".\nЧтобы выйти напишите что-нибудь и нажмите \"Enter\".\n");
+                continuation = Console.ReadLine();
             }
         }
     }
-}

@@ -1,10 +1,12 @@
 using Fin_car2;
 
-Store avtoStore = new Store();
-
-while (true)
+class Program
 {
-    Avto schAvto = avtoStore.AccMenu();
-    schAvto.Menu(avtoStore.Acc);
+    static void Main()
+    {
+        List<Avto> avtos = new();
+        Avto avto = new();
+        avto.AVTO(avtos);
+    }
 }
 
